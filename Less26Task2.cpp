@@ -8,9 +8,25 @@ private:
 
 public:
     void setNumber(std::string cNumber) {
-        number = {cNumber};
+        bool itNum{ true };
+        if (cNumber.length() == 10 && cNumber[0] == '+') {
+            for (int i{ 1 }; i < 10; i++) {
+                if (cNumber[i] < '0' || cNumber[i] > '9') itNum = { false };
+            }
+        }
+        else {
+            std::cout << "inncorrect phone num\n";
+            return;
+        }
+        if (itNum) {
+            number = { cNumber };
+        }
+        else {
+            std::cout << "inncorrect phone num\n";
+        }
+
     }
-    std::string getNumber() const {
+    std::string getNumber() {
         return number;
     }
 };
@@ -21,11 +37,19 @@ private:
     PhoneNumber phoneNumber;
 
 public:
-    std::string getName() const {
+    void setName(std::string &cSetName) {
+        name = { cSetName };
+    }
+
+    void setPhoneNum(PhoneNumber &PhoneNum4set) { 
+        phoneNumber = { PhoneNum4set };
+    }
+
+    std::string getName() {
         return name;
     }
 
-    PhoneNumber getPhoneNumber() const {
+    PhoneNumber getPhoneNumber() {
         return phoneNumber;
     }
 };
@@ -33,15 +57,15 @@ public:
 
 class PhoneBook {
 private:
-    std::vector<Contact> contacts;
+    std::vector<Contact> vecContacts;
 
 public:
-    void addContact(const std::string& name, const PhoneNumber& phone) {
-        contacts.emplace_back(name, phone);
+    void addContact(Contact &newContact) {       
+        vecContacts.push_back(newContact);                   
     }
 
-    Contact* findContactByName(const std::string& name) {
-        for (auto& contact : contacts) {
+    Contact* findContactByName(std::string& name) {
+        for (auto& contact : vecContacts) {
             if (contact.getName() == name) {
                 return &contact;
             }
@@ -49,8 +73,8 @@ public:
         return nullptr;
     }
 
-    Contact* findContactByPhone(const PhoneNumber& phone) {
-        for (auto& contact : contacts) {
+    Contact* findContactByPhone(PhoneNumber& phone) {
+        for (auto& contact : vecContacts) {
             if (contact.getPhoneNumber().getNumber() == phone.getNumber()) {
                 return &contact;
             }
@@ -70,34 +94,38 @@ public:
         std::getline(std::cin, name);
         std::cout << "Enter phone number: ";
         std::getline(std::cin, number);
-        try {
-            PhoneNumber phone(number);
-            phoneBook.addContact(name, phone);
-            std::cout << "Contact added!\n";
-        }
-        catch (const std::invalid_argument& e) {
-            std::cout << e.what() << "\n";
-        }
+        
+        Contact newContact;
+
+        PhoneNumber phone;
+        phone.setNumber(number);
+        newContact.setPhoneNum(phone);
+        newContact.setName(name);
+
+        phoneBook.addContact(newContact);          
+        std::cout << "Contact added!\n";
+        
     }
 
     void call() {
         std::string input;
         std::cout << "Enter contact name or phone number: ";
         std::getline(std::cin, input);
-        Contact* contact = phoneBook.findContactByName(input);
+        Contact* contact;
+        contact = phoneBook.findContactByName(input);
         if (!contact) {
-            try {
-                PhoneNumber phone(input);
-                contact = phoneBook.findContactByPhone(phone);
-            }
-            catch (const std::invalid_argument&) {
-                std::cout << "Invalid phone number format.\n";
-                return;
-            }
+            
+            PhoneNumber phone;
+            phone.setNumber(input);
+            contact = phoneBook.findContactByPhone(phone);
+            //if error
+            //    std::cout << "Invalid phone number format.\n";
+            //    return;
+            
         }
 
         if (contact) {
-            std::cout << "CALL " << contact->getPhoneNumber().getNumber() << '\n';
+            std::cout << "CALL " << contact->getPhoneNumber().getNumber() << std::endl;
         }
         else {
             std::cout << "Contact not found.\n";
@@ -112,14 +140,15 @@ public:
 
         Contact* contact = phoneBook.findContactByName(input);
         if (!contact) {
-            try {
-                PhoneNumber phone(input);
-                contact = phoneBook.findContactByPhone(phone);
-            }
-            catch (const std::invalid_argument&) {
-                std::cout << "Invalid phone number format.\n";
-                return;
-            }
+            
+            PhoneNumber phone;
+            phone.setNumber(input);
+            contact = phoneBook.findContactByPhone(phone);
+            
+            //if error
+            //    std::cout << "Invalid phone number format.\n";
+            //    return;
+            
         }
 
         if (contact) {
